@@ -1454,9 +1454,6 @@ function openRecipe(recipe) {
     </section>
     <p class="map-privacy-note">Your browser may ask to use your location. Opening the map shares it with Google Maps.</p>
     <p id="nearby-store-status" class="nearby-store-status" role="status" aria-live="polite"></p>
-    <a id="nearby-store-map" class="nearby-store-map" target="_blank" rel="noopener noreferrer" hidden>
-      Open nearby supermarkets in Google Maps <span aria-hidden="true">↗</span>
-    </a>
   `;
 
   const shoppingListButton = dialogContent.querySelector("#shopping-list-toggle");
@@ -1477,13 +1474,18 @@ function openRecipe(recipe) {
 
   const nearbyStoreButton = dialogContent.querySelector("#find-nearby-stores");
   const nearbyStoreStatus = dialogContent.querySelector("#nearby-store-status");
-  const nearbyStoreMap = dialogContent.querySelector("#nearby-store-map");
   nearbyStoreButton.addEventListener("click", () => {
-    nearbyStoreMap.hidden = true;
     if (!navigator.geolocation) {
       nearbyStoreStatus.textContent = "Location is not available in this browser.";
       return;
     }
+
+    const mapWindow = window.open("about:blank", "_blank");
+    if (!mapWindow) {
+      nearbyStoreStatus.textContent = "Your browser blocked the new tab. Allow pop-ups for this page, then try again.";
+      return;
+    }
+    mapWindow.opener = null;
 
     nearbyStoreButton.disabled = true;
     nearbyStoreStatus.textContent = "Waiting for your browser's location permission...";
@@ -1493,10 +1495,9 @@ function openRecipe(recipe) {
           api: "1",
           query: `supermarkets near ${coords.latitude},${coords.longitude}`
         });
-        nearbyStoreMap.href = `https://www.google.com/maps/search/?${mapSearch.toString()}`;
-        nearbyStoreMap.hidden = false;
+        mapWindow.location.href = `https://www.google.com/maps/search/?${mapSearch.toString()}`;
         nearbyStoreButton.disabled = false;
-        nearbyStoreStatus.textContent = "Nearby supermarkets are ready. Open the map to see results.";
+        nearbyStoreStatus.textContent = "Google Maps opened with nearby supermarkets.";
       },
       (error) => {
         const locationErrors = {
@@ -1506,6 +1507,7 @@ function openRecipe(recipe) {
         };
         nearbyStoreButton.disabled = false;
         nearbyStoreStatus.textContent = locationErrors[error.code] || "We couldn't get your location. Please try again.";
+        mapWindow.close();
       },
       { enableHighAccuracy: false, maximumAge: 0, timeout: 10000 }
     );
