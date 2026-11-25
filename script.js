@@ -1442,7 +1442,6 @@ function openRecipe(recipe) {
         target="_blank" rel="noopener noreferrer">Find a YouTube video <span aria-hidden="true">↗</span></a>
       <button id="shopping-list-toggle" class="recipe-action-button" type="button"
         aria-expanded="false" aria-controls="shopping-list">Make a shopping list</button>
-      <button id="find-nearby-stores" class="recipe-action-button" type="button">Find nearby supermarkets</button>
     </div>
     <p class="video-note">This opens YouTube search results. Pick a video that matches the ingredients and steps.</p>
     <section id="shopping-list" class="shopping-list" aria-labelledby="shopping-list-title" hidden>
@@ -1452,8 +1451,6 @@ function openRecipe(recipe) {
         <li><label><input class="shopping-list-checkbox" type="checkbox" data-index="${index}"><span>${ingredient}</span></label></li>
       `).join("")}</ul>
     </section>
-    <p class="map-privacy-note">Your browser may ask to use your location. Opening the map shares it with Google Maps.</p>
-    <p id="nearby-store-status" class="nearby-store-status" role="status" aria-live="polite"></p>
   `;
 
   const shoppingListButton = dialogContent.querySelector("#shopping-list-toggle");
@@ -1470,53 +1467,6 @@ function openRecipe(recipe) {
     checkbox.addEventListener("change", () => {
       localStorage.setItem(storageKey, String(checkbox.checked));
     });
-  });
-
-  const nearbyStoreButton = dialogContent.querySelector("#find-nearby-stores");
-  const nearbyStoreStatus = dialogContent.querySelector("#nearby-store-status");
-  nearbyStoreButton.addEventListener("click", () => {
-    const mapSearch = new URLSearchParams({
-      api: "1",
-      query: "supermarkets near me"
-    });
-    const mapWindow = window.open(
-      `https://www.google.com/maps/search/?${mapSearch.toString()}`,
-      "_blank"
-    );
-    if (!mapWindow) {
-      nearbyStoreStatus.textContent = "Your browser blocked the new tab. Allow pop-ups for this page, then try again.";
-      return;
-    }
-    mapWindow.opener = null;
-
-    if (!navigator.geolocation) {
-      nearbyStoreStatus.textContent = "Google Maps opened. Location is not available in this browser.";
-      return;
-    }
-
-    nearbyStoreButton.disabled = true;
-    nearbyStoreStatus.textContent = "Waiting for your browser's location permission...";
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const locatedMapSearch = new URLSearchParams({
-          api: "1",
-          query: `supermarkets near ${coords.latitude},${coords.longitude}`
-        });
-        mapWindow.location.href = `https://www.google.com/maps/search/?${locatedMapSearch.toString()}`;
-        nearbyStoreButton.disabled = false;
-        nearbyStoreStatus.textContent = "Google Maps opened with nearby supermarkets.";
-      },
-      (error) => {
-        const locationErrors = {
-          1: "Location permission was denied. Allow it in your browser settings to find nearby supermarkets.",
-          2: "Your location could not be found. Check that location services are available and try again.",
-          3: "The location request took too long. Please try again."
-        };
-        nearbyStoreButton.disabled = false;
-        nearbyStoreStatus.textContent = locationErrors[error.code] || "We couldn't get your location. Please try again.";
-      },
-      { enableHighAccuracy: false, maximumAge: 0, timeout: 10000 }
-    );
   });
 
   recipeDialog.showModal();
