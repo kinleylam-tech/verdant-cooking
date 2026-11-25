@@ -1065,6 +1065,25 @@ function getDietaryTags(recipe) {
   return dietaryTags;
 }
 
+function getAllergyTags(recipe) {
+  const ingredients = recipe.ingredients.map((ingredient) => ingredient.toLowerCase()).join(" ");
+  const allergyChecks = [
+    ["dairy", /\b(milk|cream|cheese|butter|ghee|yogurt|paneer|mozzarella|parmesan)\b/],
+    ["eggs", /\beggs?\b/],
+    ["peanuts", /\b(peanut|peanuts)\b/],
+    ["tree-nuts", /\b(almond|almonds|cashew|cashews|walnut|walnuts|pecan|pecans|pistachio|pistachios|hazelnut|hazelnuts)\b/],
+    ["soy", /\b(soy|tofu|edamame|miso)\b/],
+    ["wheat", /\b(wheat|barley|rye|bulgur|couscous|semolina|flour|bread|pasta|noodles?|udon|soba|panko|breadcrumbs?|flatbread|oats?|soy sauce|miso|gnocchi|tortillas?|cereal)\b/],
+    ["fish", /\b(salmon|tuna|anchovies|fish)\b/],
+    ["shellfish", /\b(shrimp|prawns?|crab|lobster|mussels?|clams?|oyster|scallops?)\b/],
+    ["sesame", /\bsesame\b/]
+  ];
+
+  return allergyChecks
+    .filter(([, pattern]) => pattern.test(ingredients))
+    .map(([allergy]) => allergy);
+}
+
 const recipeCatalog = [
   ...recipes,
   ...uniqueRecipes,
@@ -1072,7 +1091,8 @@ const recipeCatalog = [
   ...proteinCoverageRecipes
 ].map((recipe) => ({
   ...recipe,
-  dietaryTags: getDietaryTags(recipe)
+  dietaryTags: getDietaryTags(recipe),
+  allergyTags: getAllergyTags(recipe)
 }));
 
 const hero = document.querySelector(".hero");
@@ -1095,17 +1115,26 @@ const mealStorageKey = "recipeMeal";
 const lightStorageKey = "recipeLightOnly";
 const fridgeStorageKey = "fridgeIngredients";
 const dietaryStorageKey = "recipeDietaryFilters";
+const allergyStorageKey = "recipeAllergyFilters";
 const cuisineFilters = Array.from(document.querySelectorAll(".cuisine-filter"));
 const mealFilters = Array.from(document.querySelectorAll(".meal-filter"));
 const dietaryFilters = Array.from(document.querySelectorAll(".dietary-filter"));
+const allergyFilters = Array.from(document.querySelectorAll(".allergy-filter"));
 const dietaryFilterOptions = ["vegetarian", "gluten-free"];
+const allergyFilterOptions = ["dairy", "eggs", "peanuts", "tree-nuts", "soy", "wheat", "fish", "shellfish", "sesame"];
 const lightFilter = document.querySelector("#light-filter");
 const recipeCount = document.querySelector("#recipe-count");
 const savedCuisine = localStorage.getItem(cuisineStorageKey) || "all";
 const savedDietaryFilters = JSON.parse(localStorage.getItem(dietaryStorageKey) || "[]");
+const savedAllergyFilters = JSON.parse(localStorage.getItem(allergyStorageKey) || "[]");
 let activeDietaryFilters = new Set(
   Array.isArray(savedDietaryFilters)
     ? savedDietaryFilters.filter((filter) => dietaryFilterOptions.includes(filter))
+    : []
+);
+let activeAllergyFilters = new Set(
+  Array.isArray(savedAllergyFilters)
+    ? savedAllergyFilters.filter((filter) => allergyFilterOptions.includes(filter))
     : []
 );
 const fridgeIngredientOptions = Array.from(new Set([
@@ -1202,7 +1231,9 @@ function renderRecipes(searchText = searchInput.value) {
     const matchesLight = !lightOnly || recipe.light;
     const matchesFridge = selectedFridgeIngredients.size === 0 || getFridgeMatchCount(recipe) > 0;
     const matchesDietary = Array.from(activeDietaryFilters).every((filter) => recipe.dietaryTags.includes(filter));
-    return matchesSearch && matchesCuisine && matchesMeal && matchesLight && matchesFridge && matchesDietary;
+    const matchesNoSelectedAllergies = Array.from(activeAllergyFilters)
+      .every((allergy) => !recipe.allergyTags.includes(allergy));
+    return matchesSearch && matchesCuisine && matchesMeal && matchesLight && matchesFridge && matchesDietary && matchesNoSelectedAllergies;
   }).sort((first, second) => getFridgeMatchCount(second) - getFridgeMatchCount(first));
 
   document.querySelectorAll(".meal-grid").forEach((container) => {
@@ -1253,6 +1284,9 @@ function renderRecipes(searchText = searchInput.value) {
   });
   dietaryFilters.forEach((button) => {
     button.setAttribute("aria-pressed", String(activeDietaryFilters.has(button.dataset.dietary)));
+  });
+  allergyFilters.forEach((button) => {
+    button.setAttribute("aria-pressed", String(activeAllergyFilters.has(button.dataset.allergy)));
   });
   lightFilter.setAttribute("aria-pressed", String(lightOnly));
   document.body.dataset.cuisine = ["all", "Asian"].includes(activeCuisine) ? "" : activeCuisine;
@@ -1526,6 +1560,19 @@ dietaryFilters.forEach((button) => {
       activeDietaryFilters.add(filter);
     }
     localStorage.setItem(dietaryStorageKey, JSON.stringify(Array.from(activeDietaryFilters)));
+    renderRecipes(searchInput.value);
+  });
+});
+
+allergyFilters.forEach((button) => {
+  button.addEventListener("click", () => {
+    const filter = button.dataset.allergy;
+    if (activeAllergyFilters.has(filter)) {
+      activeAllergyFilters.delete(filter);
+    } else {
+      activeAllergyFilters.add(filter);
+    }
+    localStorage.setItem(allergyStorageKey, JSON.stringify(Array.from(activeAllergyFilters)));
     renderRecipes(searchInput.value);
   });
 });

@@ -1444,7 +1444,8 @@ dialog::backdrop {
 
 .cuisine-filter,
 .meal-filter,
-.dietary-filter {
+.dietary-filter,
+.allergy-filter {
   min-height: 44px;
   border: 1px solid #d5e4ef;
   border-radius: 999px;
@@ -1460,14 +1461,17 @@ dialog::backdrop {
 .meal-filter:hover,
 .meal-filter:focus-visible,
 .dietary-filter:hover,
-.dietary-filter:focus-visible {
+.dietary-filter:focus-visible,
+.allergy-filter:hover,
+.allergy-filter:focus-visible {
   border-color: var(--navy);
   background: #edf5fb;
 }
 
 .cuisine-filter[aria-pressed="true"],
 .meal-filter[aria-pressed="true"],
-.dietary-filter[aria-pressed="true"] {
+.dietary-filter[aria-pressed="true"],
+.allergy-filter[aria-pressed="true"] {
   border-color: var(--navy);
   color: #ffffff;
   background: var(--navy);
