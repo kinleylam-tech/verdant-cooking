@@ -3,17 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My App</title>
+  <meta name="description" content="Browse simple breakfast, lunch, dinner, and dessert recipes with step-by-step cooking instructions.">
+  <meta name="theme-color" content="#f3f9ff">
+  <title>Verdant | Recipe Finder</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <h1>My App</h1>
-    <p class="tagline">Built at the Computhink AI Coding Camp.</p>
+  <header class="site-header" id="top">
+    <a class="brand" href="#top" aria-label="Verdant home">
+      <span>Verdant</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="#recipe-finder">Recipes</a>
+      <span class="nav-badge">114 DISTINCT RECIPES</span>
+    </nav>
+  </header>
 
-    <!-- Your app goes here. Build it one Must at a time with Copilot. -->
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Your everyday recipe library</p>
+        <h1 id="hero-title">Good food,<br><em>made simple.</em></h1>
+        <p class="tagline">Find a new idea for breakfast, lunch, dinner, or dessert, then follow along one step at a time.</p>
+        <div class="hero-actions">
+          <a class="hero-cta" href="#recipe-finder">Browse recipes <span aria-hidden="true">→</span></a>
+          <p class="hero-note">Every recipe has a YouTube search link</p>
+        </div>
+        <div class="hero-stats" aria-label="What you can find">
+          <div><strong>4</strong><span>Meal types</span></div>
+          <div><strong>114</strong><span>Distinct recipes</span></div>
+          <div><strong>One step</strong><span>At a time</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="finder-section" id="recipe-finder" aria-labelledby="finder-title" hidden>
+      <div class="section-heading">
+        <p class="eyebrow">Find something tasty</p>
+        <h2 id="finder-title">Browse the recipes</h2>
+        <p>Search for a food or recipe, then combine meal, cuisine, and lighter-choice filters.</p>
+      </div>
+      <label class="recipe-search-label" for="recipe-search">Search recipes</label>
+      <input id="recipe-search" class="recipe-search" type="search"
+        placeholder="Try rice, eggs, or a recipe name..." autocomplete="off">
+      <div class="fridge-picker">
+        <div>
+          <p class="fridge-picker-title">Cooking with what you have?</p>
+          <p class="fridge-picker-copy">Choose foods from your fridge to find recipes that use them.</p>
+        </div>
+        <button id="open-fridge" class="fridge-trigger" type="button" aria-haspopup="dialog">
+          <span>Choose ingredients</span>
+          <span id="fridge-count" class="fridge-count">0 selected</span>
+        </button>
+      </div>
+      <div class="recipe-filters">
+        <div class="filter-row">
+          <p class="recipe-search-label">Meal</p>
+          <div class="cuisine-filter-list" role="group" aria-label="Filter recipes by meal">
+            <button class="meal-filter" type="button" data-meal="all" aria-pressed="true">Any meal</button>
+            <button class="meal-filter" type="button" data-meal="breakfast" aria-pressed="false">Breakfast</button>
+            <button class="meal-filter" type="button" data-meal="lunch" aria-pressed="false">Lunch</button>
+            <button class="meal-filter" type="button" data-meal="dinner" aria-pressed="false">Dinner</button>
+            <button class="meal-filter" type="button" data-meal="dessert" aria-pressed="false">Dessert</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <p class="recipe-search-label">Cuisine</p>
+          <div class="cuisine-filter-list" role="group" aria-label="Filter recipes by cuisine">
+            <button class="cuisine-filter" type="button" data-cuisine="all" aria-pressed="true">All cuisines</button>
+            <button class="cuisine-filter" type="button" data-cuisine="Asian" aria-pressed="false">Asian</button>
+            <button class="cuisine-filter" type="button" data-cuisine="Chinese" aria-pressed="false">Chinese</button>
+            <button class="cuisine-filter" type="button" data-cuisine="Mexican" aria-pressed="false">Mexican</button>
+            <button class="cuisine-filter" type="button" data-cuisine="Italian" aria-pressed="false">Italian</button>
+            <button class="cuisine-filter" type="button" data-cuisine="Japanese" aria-pressed="false">Japanese</button>
+            <button class="cuisine-filter" type="button" data-cuisine="Indian" aria-pressed="false">Indian</button>
+            <button class="cuisine-filter" type="button" data-cuisine="American" aria-pressed="false">American</button>
+          </div>
+          <p class="filter-help">Asian includes Chinese, Japanese, and Indian recipes.</p>
+        </div>
+        <div class="filter-row">
+          <p class="recipe-search-label">Dietary needs</p>
+          <div class="cuisine-filter-list" role="group" aria-label="Filter recipes by dietary needs">
+            <button class="dietary-filter" type="button" data-dietary="vegetarian" aria-pressed="false">Vegetarian</button>
+            <button class="dietary-filter" type="button" data-dietary="gluten-free" aria-pressed="false">Gluten-free</button>
+          </div>
+          <p class="filter-help">Based on listed ingredients. Check food labels for gluten.</p>
+        </div>
+        <div class="filter-row filter-row-light">
+          <p class="recipe-search-label">Make it light</p>
+          <button id="light-filter" class="light-filter" type="button" aria-pressed="false">
+            <span class="light-filter-indicator" aria-hidden="true"></span>
+            Show lighter choices
+          </button>
+        </div>
+        <p id="recipe-count" class="recipe-count" aria-live="polite">Showing recipe ideas</p>
+      </div>
+      <div id="meal-sections" aria-live="polite">
+        <section class="meal-section" aria-labelledby="breakfast-title">
+          <div class="meal-heading">
+            <p class="eyebrow">Start your day</p>
+            <h2 id="breakfast-title">Breakfast</h2>
+          </div>
+          <div id="breakfast-recipes" class="meal-grid"></div>
+        </section>
+        <section class="meal-section" aria-labelledby="lunch-title">
+          <div class="meal-heading">
+            <p class="eyebrow">Midday favorites</p>
+            <h2 id="lunch-title">Lunch</h2>
+          </div>
+          <div id="lunch-recipes" class="meal-grid"></div>
+        </section>
+        <section class="meal-section" aria-labelledby="dinner-title">
+          <div class="meal-heading">
+            <p class="eyebrow">Wind down and eat well</p>
+            <h2 id="dinner-title">Dinner</h2>
+          </div>
+          <div id="dinner-recipes" class="meal-grid"></div>
+        </section>
+        <section class="meal-section" aria-labelledby="dessert-title">
+          <div class="meal-heading">
+            <p class="eyebrow">A sweet finish</p>
+            <h2 id="dessert-title">Dessert</h2>
+          </div>
+          <div id="dessert-recipes" class="meal-grid"></div>
+        </div>
+      </section>
+    </section>
   </main>
+
+  <dialog id="recipe-dialog">
+    <button id="close-dialog" class="close-button" type="button" aria-label="Close recipe">×</button>
+    <div id="dialog-content"></div>
+  </dialog>
+
+  <dialog id="fridge-dialog" class="fridge-dialog" aria-labelledby="fridge-title">
+    <div class="fridge-dialog-heading">
+      <div>
+        <p class="eyebrow">Your kitchen</p>
+        <h2 id="fridge-title">Choose ingredients</h2>
+        <p>Pick the foods you have. Recipes with those foods will appear.</p>
+      </div>
+      <button id="close-fridge" class="close-button" type="button" aria-label="Close ingredients">×</button>
+    </div>
+    <label class="recipe-search-label" for="fridge-search">Search ingredients</label>
+    <input id="fridge-search" class="recipe-search" type="search"
+      placeholder="Try rice, eggs, or spinach..." autocomplete="off">
+    <div id="fridge-selected" class="fridge-selected" aria-live="polite"></div>
+    <div id="fridge-ingredients" class="fridge-ingredient-grid" role="group" aria-label="Available ingredients"></div>
+    <div class="fridge-dialog-actions">
+      <button id="clear-fridge" class="fridge-clear" type="button">Clear selection</button>
+      <button id="done-fridge" class="fridge-done" type="button">Show matching recipes</button>
+    </div>
+  </dialog>
 
   <script src="script.js"></script>
 </body>
