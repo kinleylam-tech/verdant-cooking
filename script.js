@@ -1475,27 +1475,34 @@ function openRecipe(recipe) {
   const nearbyStoreButton = dialogContent.querySelector("#find-nearby-stores");
   const nearbyStoreStatus = dialogContent.querySelector("#nearby-store-status");
   nearbyStoreButton.addEventListener("click", () => {
-    if (!navigator.geolocation) {
-      nearbyStoreStatus.textContent = "Location is not available in this browser.";
-      return;
-    }
-
-    const mapWindow = window.open("about:blank", "_blank");
+    const mapSearch = new URLSearchParams({
+      api: "1",
+      query: "supermarkets near me"
+    });
+    const mapWindow = window.open(
+      `https://www.google.com/maps/search/?${mapSearch.toString()}`,
+      "_blank"
+    );
     if (!mapWindow) {
       nearbyStoreStatus.textContent = "Your browser blocked the new tab. Allow pop-ups for this page, then try again.";
       return;
     }
     mapWindow.opener = null;
 
+    if (!navigator.geolocation) {
+      nearbyStoreStatus.textContent = "Google Maps opened. Location is not available in this browser.";
+      return;
+    }
+
     nearbyStoreButton.disabled = true;
     nearbyStoreStatus.textContent = "Waiting for your browser's location permission...";
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
-        const mapSearch = new URLSearchParams({
+        const locatedMapSearch = new URLSearchParams({
           api: "1",
           query: `supermarkets near ${coords.latitude},${coords.longitude}`
         });
-        mapWindow.location.href = `https://www.google.com/maps/search/?${mapSearch.toString()}`;
+        mapWindow.location.href = `https://www.google.com/maps/search/?${locatedMapSearch.toString()}`;
         nearbyStoreButton.disabled = false;
         nearbyStoreStatus.textContent = "Google Maps opened with nearby supermarkets.";
       },
@@ -1507,7 +1514,6 @@ function openRecipe(recipe) {
         };
         nearbyStoreButton.disabled = false;
         nearbyStoreStatus.textContent = locationErrors[error.code] || "We couldn't get your location. Please try again.";
-        mapWindow.close();
       },
       { enableHighAccuracy: false, maximumAge: 0, timeout: 10000 }
     );
